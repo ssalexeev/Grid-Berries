@@ -13,11 +13,27 @@ import java.util.concurrent.atomic.AtomicLong;
 public class UserRepository implements CrudRepository<User, Long> {
 
     private final Map<Long, User> database;
+
+    private final Map<String, Long> emailIndex = new ConcurrentHashMap<>();
+
     private final AtomicLong idSequence;
 
     public UserRepository() {
         this.database = new ConcurrentHashMap<>();
         this.idSequence = new AtomicLong(1000L);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+
+        Long id = emailIndex.get(email.toLowerCase().trim());
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        return findById(id);
     }
 
     @Override
@@ -29,32 +45,30 @@ public class UserRepository implements CrudRepository<User, Long> {
     }
 
     @Override
-    public List<User> findAll() {
-        return new ArrayList<>(database.values());
-    }
-
-    public List<User> findAllByRole(Role role) {
-        if (role == null) {
-            return List.of();
-        }
-        return database.values().stream()
-                .filter(user -> role.equals(user.getRole()))
-                .toList();
-    }
-
-    @Override
     public User save(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
 
+        // Generate ID if new user
         if (user.getId() == null) {
             user.setId(idSequence.getAndIncrement());
         } else {
-            delete(user);
+            // Clean up old email index entry if updating an existing user
+            User existingUser = database.get(user.getId());
+            if (existingUser != null && existingUser.getEmail() != null) {
+                emailIndex.remove(existingUser.getEmail().toLowerCase().trim());
+            }
         }
 
+        // Put in primary database
         database.put(user.getId(), user);
+
+        // Update secondary index
+        if (user.getEmail() != null) {
+            emailIndex.put(user.getEmail().toLowerCase().trim(), user.getId());
+        }
+
         return user;
     }
 
@@ -71,13 +85,25 @@ public class UserRepository implements CrudRepository<User, Long> {
             throw new IllegalArgumentException("User cannot be null");
         }
         Long id = user.getId();
-        if (id == null) {
-            throw new IllegalArgumentException("Id of user is null");
-        }
-        if (!database.containsKey(id)) {
+        if (id == null || !database.containsKey(id)) {
             throw new RuntimeException("User not found");
         }
 
-        database.remove(id);
+        User userToRemove = database.remove(id);
+        if (userToRemove != null && userToRemove.getEmail() != null) {
+            emailIndex.remove(userToRemove.getEmail().toLowerCase().trim());
+        }
+    }
+
+    @Override
+    public List<User> findAll() {
+        return new ArrayList<>(database.values());
+    }
+
+    public List<User> findAllByRole(Role role) {
+        if (role == null) return List.of();
+        return database.values().stream()
+                .filter(u -> role.equals(u.getRole()))
+                .toList();
     }
 }
