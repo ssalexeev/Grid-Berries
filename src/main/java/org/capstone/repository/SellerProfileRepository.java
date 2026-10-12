@@ -4,17 +4,19 @@ import org.capstone.domain.SellerProfile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SellerProfileRepository implements CrudRepository<SellerProfile, Long> {
 
-    private final List<SellerProfile> database;
+    private final Map<Long, SellerProfile> database;
     private final AtomicLong idSequence;
 
     public SellerProfileRepository() {
-        this.database = new ArrayList<>();
+        this.database = new ConcurrentHashMap<>();
         this.idSequence = new AtomicLong(1000L);
     }
 
@@ -23,31 +25,27 @@ public class SellerProfileRepository implements CrudRepository<SellerProfile, Lo
         if (id == null) {
             return Optional.empty();
         }
-
-        return database.stream()
-                .filter(seller -> Objects.equals(seller.getId(), id))
-                .findFirst();
+        return Optional.ofNullable(database.get(id));
     }
 
     public Optional<SellerProfile> findByUserId(Long userId) {
         if (userId == null) {
             return Optional.empty();
         }
-
-        return database.stream()
+        return database.values().stream()
                 .filter(seller -> seller.getUser() != null && Objects.equals(seller.getUser().getId(), userId))
                 .findFirst();
     }
 
     @Override
     public List<SellerProfile> findAll() {
-        return new ArrayList<>(database);
+        return new ArrayList<>(database.values());
     }
 
     @Override
     public SellerProfile save(SellerProfile seller) {
         if (seller == null) {
-            return null;
+            throw new IllegalArgumentException("Seller is null");
         }
 
         if (seller.getId() == null) {
@@ -56,7 +54,7 @@ public class SellerProfileRepository implements CrudRepository<SellerProfile, Lo
             delete(seller);
         }
 
-        database.add(seller);
+        database.put(seller.getId(), seller);
         return seller;
     }
 
@@ -76,10 +74,10 @@ public class SellerProfileRepository implements CrudRepository<SellerProfile, Lo
         if (id == null) {
             throw new IllegalArgumentException("Id of SellerProfile is null");
         }
-        if (findById(id).isEmpty()) {
+        if (!database.containsKey(id)) {
             throw new RuntimeException("Seller profile not found");
         }
 
-        database.removeIf(s -> Objects.equals(s.getId(), id));
+        database.remove(id);
     }
 }

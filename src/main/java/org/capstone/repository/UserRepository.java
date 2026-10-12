@@ -5,17 +5,18 @@ import org.capstone.domain.enums.Role;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UserRepository implements CrudRepository<User, Long> {
 
-    private final List<User> database;
+    private final Map<Long, User> database;
     private final AtomicLong idSequence;
 
     public UserRepository() {
-        this.database = new ArrayList<>();
+        this.database = new ConcurrentHashMap<>();
         this.idSequence = new AtomicLong(1000L);
     }
 
@@ -24,19 +25,19 @@ public class UserRepository implements CrudRepository<User, Long> {
         if (id == null) {
             return Optional.empty();
         }
-
-        return database.stream()
-                .filter(user -> Objects.equals(user.getId(), id))
-                .findFirst();
+        return Optional.ofNullable(database.get(id));
     }
 
     @Override
     public List<User> findAll() {
-        return new ArrayList<>(database);
+        return new ArrayList<>(database.values());
     }
 
     public List<User> findAllByRole(Role role) {
-        return database.stream()
+        if (role == null) {
+            return List.of();
+        }
+        return database.values().stream()
                 .filter(user -> role.equals(user.getRole()))
                 .toList();
     }
@@ -44,7 +45,7 @@ public class UserRepository implements CrudRepository<User, Long> {
     @Override
     public User save(User user) {
         if (user == null) {
-            return null;
+            throw new IllegalArgumentException("User cannot be null");
         }
 
         if (user.getId() == null) {
@@ -53,7 +54,7 @@ public class UserRepository implements CrudRepository<User, Long> {
             delete(user);
         }
 
-        database.add(user);
+        database.put(user.getId(), user);
         return user;
     }
 
@@ -66,14 +67,17 @@ public class UserRepository implements CrudRepository<User, Long> {
 
     @Override
     public void delete(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         Long id = user.getId();
         if (id == null) {
             throw new IllegalArgumentException("Id of user is null");
         }
-        if (findById(id) == null){
-            throw  new RuntimeException("User not found");
+        if (!database.containsKey(id)) {
+            throw new RuntimeException("User not found");
         }
 
-        database.removeIf(u -> Objects.equals(u.getId(), id));
+        database.remove(id);
     }
 }
