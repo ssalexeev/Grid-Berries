@@ -54,7 +54,6 @@ public class UserRepository implements CrudRepository<User, Long> {
         if (user.getId() == null) {
             user.setId(idSequence.getAndIncrement());
         } else {
-            // Clean up old email index entry if updating an existing user
             User existingUser = database.get(user.getId());
             if (existingUser != null && existingUser.getEmail() != null) {
                 emailIndex.remove(existingUser.getEmail().toLowerCase().trim());

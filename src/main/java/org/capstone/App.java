@@ -9,11 +9,5 @@ public class App
 {
     public static void main( String[] args )
     {
-        UserService userService = new UserService(new UserRepository());
-        SellerProfileService profileService = new SellerProfileService(new SellerProfileRepository());
-
-
-
-
     }
 }

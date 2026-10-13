@@ -20,6 +20,7 @@ public class User {
     private Boolean isActive;
     private LocalDateTime createdAt;
 
+
     public void register() {
         // Implementation logic for registration
     }
