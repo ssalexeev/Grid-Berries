@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SellerProfileRepository implements CrudRepository<SellerProfile, Long> {
@@ -15,8 +14,8 @@ public class SellerProfileRepository implements CrudRepository<SellerProfile, Lo
     private final Map<Long, SellerProfile> database;
     private final AtomicLong idSequence;
 
-    public SellerProfileRepository() {
-        this.database = new ConcurrentHashMap<>();
+    public SellerProfileRepository(Map<Long, SellerProfile> database) {
+        this.database = database;
         this.idSequence = new AtomicLong(1000L);
     }
 
