@@ -74,8 +74,6 @@ public class UserService {
         if (user == null || user.getId() == null) {
             throw new IllegalArgumentException("User or User ID cannot be null for update.");
         }
-
-        // Ensure entity exists before attempting update
         getUserById(user.getId());
 
         return userRepository.update(user);
