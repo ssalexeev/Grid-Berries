@@ -29,7 +29,6 @@ public class SellerProfileService {
             throw new IllegalArgumentException("Store name cannot be empty.");
         }
 
-        // Direct lookup via sellerRepository.findByUserId() returning Optional
         if (sellerRepository.findByUserId(user.getId()).isPresent()) {
             throw new IllegalStateException("Seller profile already exists for user ID: " + user.getId());
         }
