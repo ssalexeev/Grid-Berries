@@ -1,4 +1,4 @@
-CREATE TABLE user_metric_events (
+CREATE TABLE user_metric_event (
     id serial PRIMARY KEY,
     user_id int,
     event_type varchar(100) NOT NULL,

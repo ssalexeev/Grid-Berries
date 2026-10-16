@@ -1,4 +1,4 @@
-CREATE TABLE products (
+CREATE TABLE product (
     id serial PRIMARY KEY,
     seller_id int,
     title varchar(100) NOT NULL,

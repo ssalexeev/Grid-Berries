@@ -1,4 +1,4 @@
-CREATE TABLE cart_items (
+CREATE TABLE cart_item (
     id serial PRIMARY KEY,
     cart_id int,
     product_id int,

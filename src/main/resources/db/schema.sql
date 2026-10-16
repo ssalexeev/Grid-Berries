@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE user (
     id serial PRIMARY KEY,
     email varchar(100) NOT NULL UNIQUE,
     password_hash varchar(255) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE users (
     created_at timestamp DEFAULT NOW()
 );
 
-CREATE TABLE seller_profiles (
+CREATE TABLE seller_profile (
     id serial PRIMARY KEY,
     user_id int,
     store_name varchar(100) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE seller_profiles (
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE products (
+CREATE TABLE product (
     id serial PRIMARY KEY,
     seller_id int,
     title varchar(100) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE products (
         FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE
 );
 
-CREATE TABLE categories (
+CREATE TABLE category (
     id serial PRIMARY KEY,
     parent_category_id int,
     name varchar(100) NOT NULL UNIQUE,
@@ -41,7 +41,7 @@ CREATE TABLE categories (
         FOREIGN KEY (parent_category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
-CREATE TABLE product_categories (
+CREATE TABLE product_category (
     product_id int NOT NULL,
     category_id int NOT NULL,
     PRIMARY KEY (product_id, category_id),
@@ -51,7 +51,7 @@ CREATE TABLE product_categories (
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
-CREATE TABLE carts (
+CREATE TABLE cart (
     id serial PRIMARY KEY,
     user_id int,
     total_amount decimal(10, 2) DEFAULT 0.00,
@@ -60,7 +60,7 @@ CREATE TABLE carts (
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE orders (
+CREATE TABLE order (
     id serial PRIMARY KEY,
     user_id int,
     status varchar(50),
@@ -71,7 +71,7 @@ CREATE TABLE orders (
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE cart_items (
+CREATE TABLE cart_item (
     id serial PRIMARY KEY,
     cart_id int,
     product_id int,
@@ -83,7 +83,7 @@ CREATE TABLE cart_items (
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
-CREATE TABLE order_items (
+CREATE TABLE order_item (
     id serial PRIMARY KEY,
     order_id int,
     product_id int,
@@ -108,7 +108,7 @@ CREATE TABLE sales_analytics_reports (
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
-CREATE TABLE user_metric_events (
+CREATE TABLE user_metric_event (
     id serial PRIMARY KEY,
     user_id int,
     event_type varchar(100) NOT NULL,

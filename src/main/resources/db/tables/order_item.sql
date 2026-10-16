@@ -1,4 +1,4 @@
-CREATE TABLE order_items (
+CREATE TABLE order_item (
     id serial PRIMARY KEY,
     order_id int,
     product_id int,

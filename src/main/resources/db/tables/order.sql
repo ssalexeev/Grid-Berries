@@ -1,4 +1,4 @@
-CREATE TABLE orders (
+CREATE TABLE order (
     id serial PRIMARY KEY,
     user_id int,
     status varchar(50),

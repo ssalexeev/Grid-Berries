@@ -1,4 +1,4 @@
-CREATE TABLE carts (
+CREATE TABLE cart (
     id serial PRIMARY KEY,
     user_id int,
     total_amount decimal(10, 2) DEFAULT 0.00,

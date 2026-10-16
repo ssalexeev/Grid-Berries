@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE user (
     id serial PRIMARY KEY,
     email varchar(100) NOT NULL UNIQUE,
     password_hash varchar(255) NOT NULL,

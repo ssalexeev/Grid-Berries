@@ -1,4 +1,4 @@
-CREATE TABLE sales_analytics_reports (
+CREATE TABLE sales_analytics_report (
     id serial PRIMARY KEY,
     product_id int,
     period_start date NOT NULL,
