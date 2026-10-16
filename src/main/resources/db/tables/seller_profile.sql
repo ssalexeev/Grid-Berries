@@ -1,4 +1,4 @@
-CREATE TABLE seller_profiles (
+CREATE TABLE seller_profile (
     id serial PRIMARY KEY,
     user_id int,
     store_name varchar(100) NOT NULL,
