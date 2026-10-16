@@ -1,4 +1,4 @@
-CREATE TABLE categorie (
+CREATE TABLE category (
     id serial PRIMARY KEY,
     parent_category_id int,
     name varchar(100) NOT NULL UNIQUE,
