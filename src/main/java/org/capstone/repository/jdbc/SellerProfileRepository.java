@@ -24,6 +24,11 @@ public class SellerProfileRepository implements JdbcRepository<SellerProfile, Lo
         return jdbcUtil.findOne(query, mapper(), id);
     }
 
+    public Optional<SellerProfile> findByUserId(Long userId) {
+        String query = "SELECT * FROM seller_profile WHERE user_id = ?";
+        return jdbcUtil.findOne(query, mapper(), userId);
+    }
+
     @Override
     public List<SellerProfile> findAll() {
         String query = "SELECT * FROM seller_profile";
