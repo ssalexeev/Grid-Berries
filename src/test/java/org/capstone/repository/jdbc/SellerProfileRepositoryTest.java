@@ -101,6 +101,14 @@ class SellerProfileRepositoryTest {
         }
     }
 
+    @Test
+    void findByUserId_WhenProfileExists_ReturnsProfile() {
+        User user = createUser();
+        SellerProfile saved = repository.save(createProfile(user));
+
+        assertEquals(saved, repository.findByUserId(user.getId()).orElseThrow());
+    }
+
     @Nested
     class SaveTests {
 

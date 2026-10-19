@@ -29,7 +29,7 @@ public class SellerProfileService {
             throw new IllegalArgumentException("Store name cannot be empty.");
         }
 
-        if (sellerRepository.findById(user.getId()).isPresent()) {
+        if (sellerRepository.findByUserId(user.getId()).isPresent()) {
             throw new IllegalStateException("Seller profile already exists for user ID: " + user.getId());
         }
 
@@ -57,7 +57,7 @@ public class SellerProfileService {
             throw new IllegalArgumentException("User ID cannot be null.");
         }
 
-        return sellerRepository.findById(userId)
+        return sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Seller profile not found for user ID: " + userId));
     }
 
