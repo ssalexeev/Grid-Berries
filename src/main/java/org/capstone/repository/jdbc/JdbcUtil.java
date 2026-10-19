@@ -39,6 +39,20 @@ public class JdbcUtil {
         }
     }
 
+    public long insertAndReturnId(String query, Object... args) {
+        return findOne(query, resultSet -> {
+            try {
+                long id = resultSet.getLong(1);
+                if (resultSet.wasNull()) {
+                    throw new IllegalStateException("Insert returned a null ID");
+                }
+                return id;
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to read generated ID", e);
+            }
+        }, args).orElseThrow(() -> new IllegalStateException("Insert did not return an ID"));
+    }
+
     public void execute(String query, Consumer<PreparedStatement> consumer) {
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
