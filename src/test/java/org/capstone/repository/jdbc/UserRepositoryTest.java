@@ -1,10 +1,8 @@
-package org.capstone.repository;
+package org.capstone.repository.jdbc;
 
 
 import org.capstone.domain.User;
 import org.capstone.domain.enums.Role;
-import org.capstone.repository.jdbc.JdbcUtil;
-import org.capstone.repository.jdbc.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

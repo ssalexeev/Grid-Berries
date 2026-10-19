@@ -1,5 +1,6 @@
 package org.capstone.repository.jdbc;
 
+import lombok.RequiredArgsConstructor;
 import org.capstone.domain.User;
 import org.capstone.domain.enums.Role;
 
@@ -10,14 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 public class UserRepository implements JdbcRepository<User, Long> {
-
-
     private final JdbcUtil jdbcUtil;
 
-    public UserRepository(JdbcUtil jdbcUtil) {
-        this.jdbcUtil = jdbcUtil;
-    }
 
     @Override
     public Optional<User> findById(Long id) {
@@ -48,12 +45,12 @@ public class UserRepository implements JdbcRepository<User, Long> {
 
 
     @Override
-    public User save(User entity) {
-        if (entity == null) {
+    public User save(User user) {
+        if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
 
-        if (entity.getId() == null) {
+        if (user.getId() == null) {
             String saveQuery = """
                     INSERT INTO "user" (email, password_hash, role, is_active, created_at)
                     VALUES (?, ?, ?, ?, ?)
@@ -65,11 +62,11 @@ public class UserRepository implements JdbcRepository<User, Long> {
                 } catch (SQLException e) {
                     throw new RuntimeException("Failed to read generated user ID", e);
                 }
-            }, entity.getEmail(), entity.getPasswordHash(),
-                    entity.getRole() != null ? entity.getRole().name() : null,
-                    entity.getIsActive(), entity.getCreatedAt())
+            }, user.getEmail(), user.getPasswordHash(),
+                    user.getRole() != null ? user.getRole().name() : null,
+                    user.getIsActive(), user.getCreatedAt())
                     .orElseThrow(() -> new IllegalStateException("User insert did not return an ID"));
-            entity.setId(id);
+            user.setId(id);
         } else {
             String updateQuery = """
                     UPDATE "user"
@@ -77,24 +74,24 @@ public class UserRepository implements JdbcRepository<User, Long> {
                     WHERE id = ?
                     """;
             jdbcUtil.execute(updateQuery,
-                    entity.getEmail(),
-                    entity.getPasswordHash(),
-                    entity.getRole() != null ? entity.getRole().name() : null,
-                    entity.getIsActive(),
-                    entity.getCreatedAt(),
-                    entity.getId());
+                    user.getEmail(),
+                    user.getPasswordHash(),
+                    user.getRole() != null ? user.getRole().name() : null,
+                    user.getIsActive(),
+                    user.getCreatedAt(),
+                    user.getId());
         }
 
-        return findById(entity.getId()).orElse(null);
+        return findById(user.getId()).orElse(null);
     }
 
     @Override
-    public void delete(User entity) {
-        if (entity == null || entity.getId() == null) {
+    public void delete(User user) {
+        if (user == null || user.getId() == null) {
             throw new IllegalArgumentException("User and user ID cannot be null");
         }
         String query = "DELETE FROM \"user\" WHERE id = ?";
-        jdbcUtil.execute(query, entity.getId());
+        jdbcUtil.execute(query, user.getId());
     }
 
     @Override
