@@ -102,10 +102,18 @@ class SellerProfileServiceTest {
 
         @Test
         void createProfile_WhenProfileAlreadyExistsForUser_ThrowsIllegalStateException() {
-            User validSeller = User.builder().id(1L).role(Role.SELLER).isActive(true).build();
-            SellerProfile existingProfile = SellerProfile.builder().id(100L).user(validSeller).build();
+            User validSeller = User.builder()
+                    .id(1L)
+                    .role(Role.SELLER)
+                    .isActive(true)
+                    .build();
 
-            when(sellerRepository.findById(1L)).thenReturn(Optional.of(existingProfile));
+            SellerProfile existingProfile = SellerProfile.builder()
+                    .id(100L)
+                    .user(validSeller)
+                    .build();
+
+            when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(existingProfile));
 
             IllegalStateException ex = assertThrows(
                     IllegalStateException.class,
@@ -113,15 +121,19 @@ class SellerProfileServiceTest {
             );
 
             assertEquals("Seller profile already exists for user ID: 1", ex.getMessage());
-            verify(sellerRepository, times(1)).findById(1L);
+            verify(sellerRepository, times(1)).findByUserId(1L);
             verify(sellerRepository, never()).save(any());
         }
 
         @Test
         void createProfile_WhenValidInputs_SavesAndReturnsProfile() {
-            User validSeller = User.builder().id(1L).role(Role.SELLER).isActive(true).build();
+            User validSeller = User.builder()
+                    .id(1L)
+                    .role(Role.SELLER)
+                    .isActive(true)
+                    .build();
 
-            when(sellerRepository.findById(1L)).thenReturn(Optional.empty());
+            when(sellerRepository.findByUserId(1L)).thenReturn(Optional.empty());
             when(sellerRepository.save(any(SellerProfile.class))).thenAnswer(inv -> inv.getArgument(0));
 
             SellerProfile result = sellerProfileService.createProfile(validSeller, "Tech Store", "Best tech", "tech@store.com");
@@ -132,7 +144,7 @@ class SellerProfileServiceTest {
             assertEquals("tech@store.com", result.getContactInfo());
             assertEquals(validSeller, result.getUser());
 
-            verify(sellerRepository, times(1)).findById(1L);
+            verify(sellerRepository, times(1)).findByUserId(1L);
             verify(sellerRepository, times(1)).save(any(SellerProfile.class));
         }
     }
@@ -179,19 +191,22 @@ class SellerProfileServiceTest {
         @Test
         void getProfileByUserId_WhenFound_ReturnsProfile() {
             Long userId = 5L;
-            SellerProfile profile = SellerProfile.builder().id(200L).build();
+            SellerProfile profile = SellerProfile.builder()
+                    .id(200L)
+                    .user(User.builder().id(userId).build())
+                    .build();
 
-            when(sellerRepository.findById(userId)).thenReturn(Optional.of(profile));
+            when(sellerRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
 
             SellerProfile result = sellerProfileService.getProfileByUserId(userId);
 
             assertEquals(200L, result.getId());
-            verify(sellerRepository, times(1)).findById(userId);
+            verify(sellerRepository, times(1)).findByUserId(userId);
         }
 
         @Test
         void getProfileByUserId_WhenNotFound_ThrowsIllegalArgumentException() {
-            when(sellerRepository.findById(88L)).thenReturn(Optional.empty());
+            when(sellerRepository.findByUserId(88L)).thenReturn(Optional.empty());
 
             IllegalArgumentException ex = assertThrows(
                     IllegalArgumentException.class,
