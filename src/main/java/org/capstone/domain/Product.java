@@ -1,0 +1,38 @@
+package org.capstone.domain;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.capstone.domain.enums.ProductStatus;
+import org.capstone.domain.enums.ProductType;
+
+import java.math.BigDecimal;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Product {
+    private Long id;
+    private String title;
+    private String description;
+    private BigDecimal price;
+    private Integer stockQuantity;
+    private String imageUrl;
+    private ProductType type;
+    private ProductStatus status;
+
+    // Relationships
+    private SellerProfile sellerProfile;
+    private Category category;
+
+    public void updateStock(Integer quantity) {
+        this.stockQuantity = quantity;
+    }
+
+    public void changeStatus(ProductStatus status) {
+        this.status = status;
+    }
+}
