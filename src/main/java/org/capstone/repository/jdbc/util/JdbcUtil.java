@@ -1,8 +1,11 @@
-package org.capstone.repository.jdbc;
+package org.capstone.repository.jdbc.util;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.capstone.config.database.DBProperties;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,9 +17,18 @@ import java.util.function.Function;
 
 public class JdbcUtil {
 
-    private static  String url = "jdbc:postgresql://localhost:5432/mydatabase";
-    private static  String username = "myuser";
-    private static  String password = "mypassword";
+    private static  String url = DBProperties.URL;
+    private static  String username = DBProperties.USERNAME;
+    private static  String password = DBProperties.PASSWORD;
+
+    private final DataSource dataSource;
+
+    public JdbcUtil(int maxPoolSize) {
+        this.dataSource = createHikariPool(maxPoolSize);
+    }
+    public JdbcUtil() {
+        this.dataSource = createHikariPool(5);
+    }
 
     public static void setCredentials(String newUrl, String newUsername, String newPassword) {
         url = newUrl;
@@ -24,8 +36,18 @@ public class JdbcUtil {
         password = newPassword;
     }
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+    private HikariDataSource createHikariPool(int maxPoolSize) {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setMaximumPoolSize(maxPoolSize);
+        config.setConnectionTimeout(5000);
+        return new HikariDataSource(config);
+    }
+
+    public  Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
     public void execute(String query, Object... args) {
@@ -38,6 +60,20 @@ public class JdbcUtil {
         } catch (SQLException e) {
             throw new RuntimeException("Error executing database update: " + query, e);
         }
+    }
+
+    public long insertAndReturnId(String query, Object... args) {
+        return findOne(query, resultSet -> {
+            try {
+                long id = resultSet.getLong(1);
+                if (resultSet.wasNull()) {
+                    throw new IllegalStateException("Insert returned a null ID");
+                }
+                return id;
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to read generated ID", e);
+            }
+        }, args).orElseThrow(() -> new IllegalStateException("Insert did not return an ID"));
     }
 
     public void execute(String query, Consumer<PreparedStatement> consumer) {
